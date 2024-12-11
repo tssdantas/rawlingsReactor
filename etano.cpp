@@ -171,7 +171,7 @@ int main( int argc , char **argv )
         
         clog << num_of_steps << endl;
 
-        // int steps = 1000;
+        int steps = 1000;
         // StepOverflowChecker overflow_checker(steps++); // Maximum 100 steps allowed
 
         // size_t num_of_steps_A = integrate_n_steps(
