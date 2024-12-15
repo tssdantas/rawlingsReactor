@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <utility>
-
+#include <cmath>
 #include <boost/numeric/odeint.hpp>
 
 #include <boost/phoenix/core.hpp>
@@ -41,6 +41,10 @@ double calculate_concentration(double N_species, double N_total, double T) {
     return (P / (R * T)) * (N_species / N_total);
 }
 
+// double calculate_concentration_P(double N_species, double N_total, double T) {
+//     return ((R * T) / P) * (N_species / N_total);
+// }
+
 // Função do sistema de equações diferenciais
 void decomposicao_etano(const vector_type& N, vector_type& dNdV, double V, double T) {
     // Calculando as constantes de taxa
@@ -69,25 +73,51 @@ void decomposicao_etano(const vector_type& N, vector_type& dNdV, double V, doubl
     double r5 = k5 * C_hno;
     double r6 = k6 * C_c2h5 * C_hno;
 
-    double dndv0 =  -r1 - r3 + r6;        // dNc2h6/dV
-    double dndv1 =  -r1 - r4 + r5 + r6;   // dNno/dV
-    double dndv2  =  r1 - r2 + r3 - r6;    // dNc2h5/dV
-    double dndv3  =  r1 + r4 - r5 - r6;    // dNhno/dV
-    double dndv4  =  r2 - r3 - r4 + r5;    // dNh/dV
-    double dndv5  =  r2;                   // dNc2h4/dV
-    double dndv6  =  r3;                   // dNh2/dV
-
-    dNdV[0] =  dndv0; 
-    dNdV[1] =  dndv1; 
-    dNdV[2] =  dndv2; 
-    dNdV[3] =  dndv3; 
-    dNdV[4] =  dndv4; 
-    dNdV[5] =  dndv5; 
-    dNdV[6] =  dndv6; 
+    // Equações diferenciais
+    dNdV[0] =  -r1 - r3 + r6;        // dNc2h6/dV
+    dNdV[1] =  -r1 - r4 + r5 + r6;   // dNno/dV
+    dNdV[2] =  r1 - r2 + r3 - r6;    // dNc2h5/dV
+    dNdV[3] =  r1 + r4 - r5 - r6;    // dNhno/dV
+    dNdV[4] =  r2 - r3 - r4 + r5;    // dNh/dV
+    dNdV[5] =  r2;                   // dNc2h4/dV
+    dNdV[6] =  r3;                   // dNh2/dV
 }
 
+void decomposicao_benezo(const vector_type& N, vector_type& dNdV, double V, double T) {
+    double _k1 = 7.0e5;
+    double K1 = 0.31;
+    double _k2 = 4e5;
+    double K2 = 0.48;
+
+    // Fluxos molares
+    double N_total = std::accumulate(N.begin(), N.end(), 0.0);
+
+    // Concentrações
+    double C_c6h6 = calculate_concentration(N[0], N_total, T);
+    double C_h = calculate_concentration(N[1], N_total, T);
+    double C_c12h10 = calculate_concentration(N[2], N_total, T);
+    double C_c18h14 = calculate_concentration(N[3], N_total, T);
+
+    double r1 = _k1 * ( std::pow(C_c6h6, 2) - ((C_c12h10 * C_h)/K1));
+    double r2 = _k2 * ((C_c6h6 * C_c12h10)  - ((C_c18h14 * C_h)/K2));
+
+    dNdV[0] =  -(2*r1) - r2;    // dNc2h6/dV
+    dNdV[1] =  r1 + r2;         // dNno/dV
+    dNdV[2] =  r1 - r2;    // dNc2h5/dV
+    dNdV[3] =  r2;    // dNhno/dV
+}
+
+struct sysBenzeno {
+    double T = 1000; // Temperatura do sistema
+
+    // Método para calcular as derivadas (EDOs)
+    void operator()(const vector_type& N, vector_type& dNdV, double V) const {
+        decomposicao_benezo(N, dNdV, V, T);
+    }
+};
+
 struct sysEtano {
-    double T = 1001.0; // Temperatura do sistema
+    double T = 1000; // Temperatura do sistema
 
     // Método para calcular as derivadas (EDOs)
     void operator()(const vector_type& N, vector_type& dNdV, double V) const {
@@ -96,7 +126,7 @@ struct sysEtano {
 };
 
 struct JEtano {
-    double T = 1001.0; // Temperatura do sistema
+    double T = 1050; // Temperatura do sistema
 
     // Método para calcular as derivadas (EDOs)
     void operator()(const vector_type &N , matrix_type &J , const double &V , vector_type &dNdV) const {
@@ -141,14 +171,15 @@ int main( int argc , char **argv )
 
 
 
-    // Condições iniciais Etano
-    vector_type N0 (7);
-    for (int i=0; i<6; i++) { N0[i] = 0.0; }
-
-    N0[0] = 6.62e-3;
-    N0[1] = 3.48e-4;
-
     try {
+
+        // Condições iniciais Etano
+        vector_type N0 (7);
+        for (int i=0; i<7; i++) { N0[i] = 0.0; }
+
+        N0[0] = 6.62e-3;
+        N0[1] = 3.48e-4;
+
         typedef runge_kutta_dopri5< vector_type > dopri5_type;
         // typedef controlled_runge_kutta< dopri5_type > controlled_dopri5_type;
         // typedef dense_output_runge_kutta< controlled_dopri5_type > dense_output_dopri5_type;
@@ -165,18 +196,18 @@ int main( int argc , char **argv )
         // );
 
 
-        // size_t num_of_steps = integrate_adaptive(make_controlled( 3.0e-3 , 2.0e-3 ,  dopri5_type() )  ,
-        //     sysEtano(), N0, 0.0, 0.0015, (0.0015/1e3),
+        // size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-3 , 1.0e-3 ,  dopri5_type() )  ,
+        //     sysEtano(), N0, 0.0, 0.0015, (0.0015/1e6),
         //     myObserver
         // );
 
-        size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (5.0e-3, 5.0e-3) ,
-                make_pair(sysEtano() , JEtano()) ,
-                N0 , 0.0 , 0.0015, (0.0015/1e3), 
-                myObserver
-        );
+        // size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (5.0e-3, 5.0e-3) ,
+        //         make_pair(sysEtano() , JEtano()) ,
+        //         N0 , 0.0 , 0.0015, (0.0015/1e3), 
+        //         myObserver
+        // );
         
-        clog << num_of_steps << endl;
+        //clog << num_of_steps << endl;
 
         //int steps = 1000;
         // StepOverflowChecker overflow_checker(steps++); // Maximum 100 steps allowed
@@ -193,6 +224,18 @@ int main( int argc , char **argv )
         //         myObserver(N, t);     // Call observer
         //     }
         // );
+
+        //Benzeno
+        vector_type B0 (4);
+        for (int i=0; i < 4; i++) { B0[i] = 0.0; }
+        B0[0] = 1.0;
+
+        size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-3 , 1.0e-3 ,  dopri5_type() )  ,
+            sysBenzeno(), B0, 0.0, 0.0015, (0.0015/1e6),
+            myObserver
+        );
+
+        clog << num_of_steps << endl;
 
     } catch (std::exception &e) {
         std::cerr << "Erro: " << e.what() <<std:: endl;
