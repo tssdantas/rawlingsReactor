@@ -230,8 +230,14 @@ int main( int argc , char **argv )
         for (int i=0; i < 4; i++) { B0[i] = 0.0; }
         B0[0] = 1.0;
 
-        size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-3 , 1.0e-3 ,  dopri5_type() )  ,
-            sysBenzeno(), B0, 0.0, 0.0015, (0.0015/1e6),
+        // size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-3 , 1.0e-3 ,  dopri5_type() )  ,
+        //     sysBenzeno(), B0, 0.0, 0.0015, (0.0015/1e6),
+        //     myObserver
+        // );
+
+        size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (5.0e-3, 5.0e-3) ,
+            make_pair(sysBenzeno() , JEtano()),
+            B0 , 0.0 , 0.0015, (0.0015/1e3), 
             myObserver
         );
 
