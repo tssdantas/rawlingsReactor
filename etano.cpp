@@ -69,18 +69,25 @@ void decomposicao_etano(const vector_type& N, vector_type& dNdV, double V, doubl
     double r5 = k5 * C_hno;
     double r6 = k6 * C_c2h5 * C_hno;
 
-    // Equações diferenciais
-    dNdV[0] =  -r1 - r3 + r6;        // dNc2h6/dV
-    dNdV[1] =  -r1 - r4 + r5 + r6;   // dNno/dV
-    dNdV[2] =  r1 - r2 + r3 - r6;    // dNc2h5/dV
-    dNdV[3] =  r1 + r4 - r5 - r6;    // dNhno/dV
-    dNdV[4] =  r2 - r3 - r4 + r5;    // dNh/dV
-    dNdV[5] =  r2;                   // dNc2h4/dV
-    dNdV[6] =  r3;                   // dNh2/dV
+    double dndv0 =  -r1 - r3 + r6;        // dNc2h6/dV
+    double dndv1 =  -r1 - r4 + r5 + r6;   // dNno/dV
+    double dndv2  =  r1 - r2 + r3 - r6;    // dNc2h5/dV
+    double dndv3  =  r1 + r4 - r5 - r6;    // dNhno/dV
+    double dndv4  =  r2 - r3 - r4 + r5;    // dNh/dV
+    double dndv5  =  r2;                   // dNc2h4/dV
+    double dndv6  =  r3;                   // dNh2/dV
+
+    dNdV[0] =  dndv0; 
+    dNdV[1] =  dndv1; 
+    dNdV[2] =  dndv2; 
+    dNdV[3] =  dndv3; 
+    dNdV[4] =  dndv4; 
+    dNdV[5] =  dndv5; 
+    dNdV[6] =  dndv6; 
 }
 
 struct sysEtano {
-    double T = 1000; // Temperatura do sistema
+    double T = 1001.0; // Temperatura do sistema
 
     // Método para calcular as derivadas (EDOs)
     void operator()(const vector_type& N, vector_type& dNdV, double V) const {
@@ -89,7 +96,7 @@ struct sysEtano {
 };
 
 struct JEtano {
-    double T = 1050; // Temperatura do sistema
+    double T = 1001.0; // Temperatura do sistema
 
     // Método para calcular as derivadas (EDOs)
     void operator()(const vector_type &N , matrix_type &J , const double &V , vector_type &dNdV) const {
@@ -158,14 +165,14 @@ int main( int argc , char **argv )
         // );
 
 
-        // size_t num_of_steps = integrate_adaptive( make_controlled( 3.0e-3 , 2.0e-3 ,  dopri5_type() )  ,
+        // size_t num_of_steps = integrate_adaptive(make_controlled( 3.0e-3 , 2.0e-3 ,  dopri5_type() )  ,
         //     sysEtano(), N0, 0.0, 0.0015, (0.0015/1e3),
         //     myObserver
         // );
 
-        size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (4e-3, 3.0e-3) ,
+        size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (5.0e-3, 5.0e-3) ,
                 make_pair(sysEtano() , JEtano()) ,
-                N0 , 0.0 , 0.0015, (0.0015/1e4), 
+                N0 , 0.0 , 0.0015, (0.0015/1e3), 
                 myObserver
         );
         
