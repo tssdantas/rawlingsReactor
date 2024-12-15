@@ -14,17 +14,17 @@ namespace phoenix = boost::phoenix;
 const double mu = 1000.0;
 
 // Definições de constantes
-const double A1 = 1.0e14;
+const double A1 = 1e14;
 const double E1 = 217600.0;
-const double A2 = 3.0e14; 
+const double A2 = 3e14; 
 const double E2 = 165300.0;
 const double A3 = 3.4e12; 
 const double E3 = 28500.0;
-const double A4 = 1.0e12; 
+const double A4 = 1e12; 
 const double E4 = 0.0;
-const double A5 = 1.0e13; 
+const double A5 = 1e13; 
 const double E5 = 200800.0;
-const double A6 = 1.0e12; 
+const double A6 = 1e12; 
 const double E6 = 0.0;
 const double R = 8.314;
 const double P = 101325.0;
@@ -34,11 +34,11 @@ typedef boost::numeric::ublas::vector< double > vector_type;
 typedef boost::numeric::ublas::matrix< double > matrix_type;
 
 double calculate_k(double A, double E, double T) {
-    return A * std::exp(-E / (R * T));
+    return (A * (std::exp(-E / (R * T))));
 }
 
 double calculate_concentration(double N_species, double N_total, double T) {
-    return (P / (R * T)) * (N_species / N_total);
+    return ((P / (R * T)) * (N_species / N_total));
 }
 
 // double calculate_concentration_P(double N_species, double N_total, double T) {
@@ -74,8 +74,8 @@ void decomposicao_etano(const vector_type& N, vector_type& dNdV, double V, doubl
     double r6 = k6 * C_c2h5 * C_hno;
 
     // Equações diferenciais
-    dNdV[0] =  -r1 - r3 + r6;        // dNc2h6/dV
-    dNdV[1] =  -r1 - r4 + r5 + r6;   // dNno/dV
+    dNdV[0] =  (-1*r1) - r3 + r6;        // dNc2h6/dV
+    dNdV[1] =  (-1*r1) - r4 + r5 + r6;   // dNno/dV
     dNdV[2] =  r1 - r2 + r3 - r6;    // dNc2h5/dV
     dNdV[3] =  r1 + r4 - r5 - r6;    // dNhno/dV
     dNdV[4] =  r2 - r3 - r4 + r5;    // dNh/dV
@@ -117,7 +117,7 @@ struct sysBenzeno {
 };
 
 struct sysEtano {
-    double T = 1000; // Temperatura do sistema
+    double T = 1050; // Temperatura do sistema
 
     // Método para calcular as derivadas (EDOs)
     void operator()(const vector_type& N, vector_type& dNdV, double V) const {
@@ -190,16 +190,16 @@ int main( int argc , char **argv )
         // );
 
 
-        // size_t num_of_steps = integrate_n_steps( make_dense_output( 1.0e-2 , 1.0e-2 ,  runge_kutta_dopri5< vector_type >()) ,
-        //     sysEtano(), N0, 0.0 , 0.0015 , (0.0015/1e2),
+        // size_t num_of_steps = integrate_n_steps( make_dense_output( 1.0e-1, 1.0e-1, 1.0e-1,  dopri5_type()) ,
+        //     sysEtano(), N0, 0.0 , (0.0015/1e3), 100,
         //     myObserver
         // );
 
 
-        // size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-3 , 1.0e-3 ,  dopri5_type() )  ,
-        //     sysEtano(), N0, 0.0, 0.0015, (0.0015/1e6),
-        //     myObserver
-        // );
+        size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-2 , 1.0e-2 ,  dopri5_type() )  ,
+            sysEtano(), N0, 0.0, 0.0015, (0.0015/1e3),
+            myObserver
+        );
 
         // size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (5.0e-3, 5.0e-3) ,
         //         make_pair(sysEtano() , JEtano()) ,
@@ -235,11 +235,11 @@ int main( int argc , char **argv )
         //     myObserver
         // );
 
-        size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (5.0e-3, 5.0e-3) ,
-            make_pair(sysBenzeno() , JEtano()),
-            B0 , 0.0 , 0.0015, (0.0015/1e3), 
-            myObserver
-        );
+        // size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (5.0e-3, 5.0e-3) ,
+        //     make_pair(sysBenzeno() , JEtano()),
+        //     B0 , 0.0 , 0.0015, (0.0015/1e3), 
+        //     myObserver
+        // );
 
         clog << num_of_steps << endl;
 
