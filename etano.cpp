@@ -33,8 +33,10 @@ const double P = 101325.0;
 typedef boost::numeric::ublas::vector< double > vector_type;
 typedef boost::numeric::ublas::matrix< double > matrix_type;
 
+std::ofstream myfile("output.csv");
+
 double calculate_k(double A, double E, double T) {
-    return (A * (std::exp(-E / (R * T))));
+    return (A * (std::exp((-1*E) / (R * T))));
 }
 
 double calculate_concentration(double N_species, double N_total, double T) {
@@ -103,8 +105,8 @@ void decomposicao_benezo(const vector_type& N, vector_type& dNdV, double V, doub
 
     dNdV[0] =  -(2*r1) - r2;    // dNc2h6/dV
     dNdV[1] =  r1 + r2;         // dNno/dV
-    dNdV[2] =  r1 - r2;    // dNc2h5/dV
-    dNdV[3] =  r2;    // dNhno/dV
+    dNdV[2] =  r1 - r2;         // dNc2h5/dV
+    dNdV[3] =  r2;              // dNhno/dV
 }
 
 struct sysBenzeno {
@@ -139,8 +141,10 @@ void myObserver(const vector_type &x, double t) {
     try {
         std::cout << t << '\t'; 
         for (auto _v:x) {
+            myfile << _v << ", ";
             std::cout << _v << "\t";
         }
+        myfile << std::endl;
         std::cout << std::endl;
     } catch (const std::exception &e) {
         std::cerr << "Erro: " << e.what() <<std:: endl;
@@ -196,10 +200,10 @@ int main( int argc , char **argv )
         // );
 
 
-        size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-2 , 1.0e-2 ,  dopri5_type() )  ,
-            sysEtano(), N0, 0.0, 0.0015, (0.0015/1e3),
-            myObserver
-        );
+        // size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-2 , 1.0e-2 ,  dopri5_type() )  ,
+        //     sysEtano(), N0, 0.0, 0.0015, (0.0015/1e3),
+        //     myObserver
+        // );
 
         // size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (5.0e-3, 5.0e-3) ,
         //         make_pair(sysEtano() , JEtano()) ,
@@ -230,10 +234,10 @@ int main( int argc , char **argv )
         for (int i=0; i < 4; i++) { B0[i] = 0.0; }
         B0[0] = 1.0;
 
-        // size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-3 , 1.0e-3 ,  dopri5_type() )  ,
-        //     sysBenzeno(), B0, 0.0, 0.0015, (0.0015/1e6),
-        //     myObserver
-        // );
+        size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-3 , 1.0e-3 ,  dopri5_type() )  ,
+            sysBenzeno(), B0, 0.0, 0.0015, (0.0015/1e4),
+            myObserver
+        );
 
         // size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (5.0e-3, 5.0e-3) ,
         //     make_pair(sysBenzeno() , JEtano()),
@@ -248,6 +252,6 @@ int main( int argc , char **argv )
     }
 
 
-
+    myfile.close();
     return 0;
 }
