@@ -43,10 +43,6 @@ double calculate_concentration(double N_species, double N_total, double T) {
     return ((P / (R * T)) * (N_species / N_total));
 }
 
-// double calculate_concentration_P(double N_species, double N_total, double T) {
-//     return ((R * T) / P) * (N_species / N_total);
-// }
-
 // Função do sistema de equações diferenciais
 void decomposicao_etano(const vector_type& N, vector_type& dNdV, double V, double T) {
     // Calculando as constantes de taxa
@@ -68,7 +64,7 @@ void decomposicao_etano(const vector_type& N, vector_type& dNdV, double V, doubl
     double C_h = calculate_concentration(N[4], N_total, T);
 
     // Taxas de reação
-    double r1 = k1 * C_c2h6 * C_no;
+    double r1 = k1 * C_c2h6 * C_no; //rever unidade
     double r2 = k2 * C_c2h5;
     double r3 = k3 * C_h * C_c2h6;
     double r4 = k4 * C_h * C_no;
@@ -84,39 +80,6 @@ void decomposicao_etano(const vector_type& N, vector_type& dNdV, double V, doubl
     dNdV[5] =  r2;                   // dNc2h4/dV
     dNdV[6] =  r3;                   // dNh2/dV
 }
-
-void decomposicao_benezo(const vector_type& N, vector_type& dNdV, double V, double T) {
-    double _k1 = 7.0e5;
-    double K1 = 0.31;
-    double _k2 = 4e5;
-    double K2 = 0.48;
-
-    // Fluxos molares
-    double N_total = std::accumulate(N.begin(), N.end(), 0.0);
-
-    // Concentrações
-    double C_c6h6 = calculate_concentration(N[0], N_total, T);
-    double C_h = calculate_concentration(N[1], N_total, T);
-    double C_c12h10 = calculate_concentration(N[2], N_total, T);
-    double C_c18h14 = calculate_concentration(N[3], N_total, T);
-
-    double r1 = _k1 * ( std::pow(C_c6h6, 2) - ((C_c12h10 * C_h)/K1));
-    double r2 = _k2 * ((C_c6h6 * C_c12h10)  - ((C_c18h14 * C_h)/K2));
-
-    dNdV[0] =  -(2*r1) - r2;    // dNc2h6/dV
-    dNdV[1] =  r1 + r2;         // dNno/dV
-    dNdV[2] =  r1 - r2;         // dNc2h5/dV
-    dNdV[3] =  r2;              // dNhno/dV
-}
-
-struct sysBenzeno {
-    double T = 1000; // Temperatura do sistema
-
-    // Método para calcular as derivadas (EDOs)
-    void operator()(const vector_type& N, vector_type& dNdV, double V) const {
-        decomposicao_benezo(N, dNdV, V, T);
-    }
-};
 
 struct sysEtano {
     double T = 1050; // Temperatura do sistema
@@ -139,7 +102,8 @@ struct JEtano {
 
 void myObserver(const vector_type &x, double t) {
     try {
-        std::cout << t << '\t'; 
+        std::cout << t << '\t';
+        myfile << t << ", "; 
         for (auto _v:x) {
             myfile << _v << ", ";
             std::cout << _v << "\t";
@@ -173,8 +137,6 @@ int main( int argc , char **argv )
     /* initialize random seed: */
     srand ( time(NULL) );
 
-
-
     try {
 
         // Condições iniciais Etano
@@ -200,10 +162,10 @@ int main( int argc , char **argv )
         // );
 
 
-        // size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-2 , 1.0e-2 ,  dopri5_type() )  ,
-        //     sysEtano(), N0, 0.0, 0.0015, (0.0015/1e3),
-        //     myObserver
-        // );
+        size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-2 , 1.0e-2 ,  dopri5_type() )  ,
+            sysEtano(), N0, 0.0, 0.0015, (0.0015/1e3),
+            myObserver
+        );
 
         // size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (5.0e-3, 5.0e-3) ,
         //         make_pair(sysEtano() , JEtano()) ,
@@ -229,21 +191,6 @@ int main( int argc , char **argv )
         //     }
         // );
 
-        //Benzeno
-        vector_type B0 (4);
-        for (int i=0; i < 4; i++) { B0[i] = 0.0; }
-        B0[0] = 1.0;
-
-        size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-3 , 1.0e-3 ,  dopri5_type() )  ,
-            sysBenzeno(), B0, 0.0, 0.0015, (0.0015/1e4),
-            myObserver
-        );
-
-        // size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (5.0e-3, 5.0e-3) ,
-        //     make_pair(sysBenzeno() , JEtano()),
-        //     B0 , 0.0 , 0.0015, (0.0015/1e3), 
-        //     myObserver
-        // );
 
         clog << num_of_steps << endl;
 
