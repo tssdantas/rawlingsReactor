@@ -68,11 +68,21 @@ void decomposicao_benezo(const vector_type& N, vector_type& dNdV, double V, doub
 }
 
 struct sysBenzeno {
-    double T = 1000; // Temperatura do sistema
+    double T = 1033; // Temperatura do sistema
 
     // Método para calcular as derivadas (EDOs)
     void operator()(const vector_type& N, vector_type& dNdV, double V) const {
         decomposicao_benezo(N, dNdV, V, T);
+    }
+};
+
+struct JBenzeno {
+    double T = 1050; // Temperatura do sistema
+
+    // Método para calcular as derivadas (EDOs)
+    void operator()(const vector_type &N , matrix_type &J , const double &V , vector_type &dNdV) const {
+        //
+        J.clear();
     }
 };
 
@@ -127,16 +137,16 @@ int main( int argc , char **argv )
         for (int i=0; i < 4; i++) { B0[i] = 0.0; }
         B0[0] = 1.0;
 
-        size_t num_of_steps = integrate_adaptive(make_controlled(10, 10 ,  dopri5_type() )  ,
-            sysBenzeno(), B0, 0.0, 1500.0, (1500.0/1e10),
-            myObserver
-        );
-
-        // size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (1.0e-2, 1.0e-2) ,
-        //     make_pair(sysBenzeno() , JEtano()),
-        //     B0 , 0.0 , 0.0015, (0.0015/1e2), 
+        // size_t num_of_steps = integrate_adaptive(make_controlled(100, 100,  dopri5_type() )  ,
+        //     sysBenzeno(), B0, 0.0, 1500.0, (1500.0/1e10),
         //     myObserver
         // );
+
+        size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (1.0, 1.0) ,
+            make_pair(sysBenzeno() , JBenzeno()),
+            B0 , 0.0 , 1500.0, (1500.0/1.0e3), 
+            myObserver
+        );
 
         clog << num_of_steps << endl;
 

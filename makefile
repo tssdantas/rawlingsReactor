@@ -12,7 +12,8 @@ else ifeq ($(findstring MINGW,$(UNAME_S)),MINGW)
 else ifeq ($(UNAME_S),Linux)
   # Linux specific commands
   OS := linux
-  COMMAND = g++-10 -std=c++14 -I/.include -Wall -g etano.cpp -o etano
+  #COMMAND = g++-10 -std=c++14 -I/.include -Wall -g etano.cpp -o etano
+  COMMAND = g++-10 -std=c++14 -I/.include -Wall -g benzeno.cpp -o benzeno
 else
   $(error Unsupported OS)
 endif
