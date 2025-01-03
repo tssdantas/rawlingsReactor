@@ -26,7 +26,7 @@ const double A5 = 1e13;
 const double E5 = 200800.0;
 const double A6 = 1e12; 
 const double E6 = 0.0;
-const double R = 8.314;
+const double R = 8314.0;
 const double P = 101325.0;
 
 
@@ -53,10 +53,10 @@ void decomposicao_benezo(const vector_type& N, vector_type& dNdV, double V, doub
     double N_total = std::accumulate(N.begin(), N.end(), 0.0);
 
     // Concentrações
-    double C_c6h6 = calculate_concentration(N[0], N_total, T)*1000; //m3/mol para L/mol
-    double C_h = calculate_concentration(N[1], N_total, T)*1000;
-    double C_c12h10 = calculate_concentration(N[2], N_total, T)*1000;
-    double C_c18h14 = calculate_concentration(N[3], N_total, T)*1000;
+    double C_c6h6 = calculate_concentration(N[0], N_total, T); //m3/mol para L/mol
+    double C_h = calculate_concentration(N[1], N_total, T);
+    double C_c12h10 = calculate_concentration(N[2], N_total, T);
+    double C_c18h14 = calculate_concentration(N[3], N_total, T);
 
     double r1 = _k1 * ( std::pow(C_c6h6, 2) - ((C_c12h10 * C_h)/K1));
     double r2 = _k2 * ((C_c6h6 * C_c12h10)  - ((C_c18h14 * C_h)/K2));
@@ -137,14 +137,14 @@ int main( int argc , char **argv )
         for (int i=0; i < 4; i++) { B0[i] = 0.0; }
         B0[0] = 1.0;
 
-        // size_t num_of_steps = integrate_adaptive(make_controlled(100, 100,  dopri5_type() )  ,
-        //     sysBenzeno(), B0, 0.0, 1500.0, (1500.0/1e10),
+        // size_t num_of_steps = integrate_adaptive(make_controlled(10, 10,  dopri5_type() )  ,
+        //     sysBenzeno(), B0, 0.0, 1500.0, (1500.0/1e6),
         //     myObserver
         // );
 
         size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (1.0, 1.0) ,
             make_pair(sysBenzeno() , JBenzeno()),
-            B0 , 0.0 , 1500.0, (1500.0/1.0e3), 
+            B0 , 0.0 , 1500.0, (1500.0/1.0e6), 
             myObserver
         );
 
