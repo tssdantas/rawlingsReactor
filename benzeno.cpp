@@ -137,12 +137,12 @@ int main( int argc , char **argv )
         for (int i=0; i < 4; i++) { B0[i] = 0.0; }
         B0[0] = 1.0;
 
-        // size_t num_of_steps = integrate_adaptive(make_controlled(10, 10,  dopri5_type() )  ,
-        //     sysBenzeno(), B0, 0.0, 1500.0, (1500.0/1e6),
+        // size_t num_of_steps = integrate_adaptive(make_controlled(0.1, 0.1,  dopri5_type() )  ,
+        //     sysBenzeno(), B0, 0.0, 1500.0, (1500.0/1e9),
         //     myObserver
         // );
 
-        size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (1.0, 1.0) ,
+        size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (1.0e-2, 1.0e-2) ,
             make_pair(sysBenzeno() , JBenzeno()),
             B0 , 0.0 , 1500.0, (1500.0/1.0e6), 
             myObserver
