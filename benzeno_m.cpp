@@ -80,9 +80,10 @@ public:
     }
 
 private:
-    void checkArguments(const ArgumentList& inputs) {
-        if (inputs.size() != 0) {
-            throw std::invalid_argument("This function does not take any input arguments.");
-        }
+void checkArguments(const ArgumentList& inputs) {
+    auto& non_const_inputs = const_cast<ArgumentList&>(inputs);
+    if (non_const_inputs.size() != 0) {
+        throw std::invalid_argument("This function does not take any input arguments.");
     }
+}
 };
