@@ -1,5 +1,4 @@
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <numeric>
 #include "MatlabEngine.hpp"
@@ -15,19 +14,21 @@ int main(int argc, char** argv) {
 
         // Define initial conditions and parameters
         std::vector<double> N0 = {1.0, 0.0, 0.0, 0.0}; // Initial moles
-        std::vector<double> V_span = {0.0, 1500.0};     // Volume span
+        std::vector<double> V_span = {0.0, 10.0};     // Volume span
         double T = 1033.0;                            // Temperature (K)
 
-        // Create MATLAB data arrays
-        TypedArray<double> N0_matlab = matlabPtr->createArray({4}, N0.begin(), N0.end());
-        TypedArray<double> V_span_matlab = matlabPtr->createArray({2}, V_span.begin(), V_span.end());
+        // Use ArrayFactory to create MATLAB arrays
+        ArrayFactory factory;
+        TypedArray<double> N0_matlab = factory.createArray<double>({4}, N0.data(), N0.data() + N0.size());
+        TypedArray<double> V_span_matlab = factory.createArray<double>({2}, V_span.data(), V_span.data() + V_span.size());
 
         // Call MATLAB function
-        auto results = matlabPtr->feval(u"solveBenzenoODE", {N0_matlab, V_span_matlab, matlab::data::ArrayFactory().createScalar(T)});
+        std::vector<Array> args = {N0_matlab, V_span_matlab, factory.createScalar(T)};
+        std::vector<Array> results = matlabPtr->feval(u"solveBenzenoODE", 2, args);
 
         // Extract results
-        auto V_result = results[0].getArray<double>();
-        auto N_result = results[1].getArray<double>();
+        TypedArray<double> V_result = results[0];
+        TypedArray<double> N_result = results[1];
 
         // Print the results
         std::cout << "Volume (V): ";

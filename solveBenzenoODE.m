@@ -2,9 +2,9 @@ function [V, N] = solveBenzenoODE(N0, V_span, T)
     % Define the system of ODEs
     function dNdV = benzenoODE(V, N)
         % Constants
-        _k1 = 7.0e5; % L/mol.h
+        k1 = 7.0e5; % L/mol.h
         K1 = 0.31;
-        _k2 = 4.0e5; % L/mol.h
+        k2 = 4.0e5; % L/mol.h
         K2 = 0.48;
         P = 101325; % Pa
         R = 8314;   % J/(mol.K)
@@ -19,8 +19,8 @@ function [V, N] = solveBenzenoODE(N0, V_span, T)
         C_c18h14 = (P / (R * T)) * (N(4) / N_total);
         
         % Reaction rates
-        r1 = _k1 * (C_c6h6^2 - (C_c12h10 * C_h) / K1);
-        r2 = _k2 * (C_c6h6 * C_c12h10 - (C_c18h14 * C_h) / K2);
+        r1 = k1 * (C_c6h6^2 - (C_c12h10 * C_h) / K1);
+        r2 = k2 * (C_c6h6 * C_c12h10 - (C_c18h14 * C_h) / K2);
         
         % ODEs
         dNdV = zeros(4, 1);
