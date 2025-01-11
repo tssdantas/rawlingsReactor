@@ -4,7 +4,7 @@ UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Darwin)
   # macOS specific commands
   OS := macos
-  COMMAND = g++-13 -std=c++14 -I/opt/homebrew/Cellar/boost/1.86.0_2/include -L/opt/homebrew/Cellar/boost/1.86.0_2/lib -lboost_system -Wall -g benzeno.cpp -o benzeno
+  COMMAND = g++-13 -std=c++14 -I/opt/homebrew/Cellar/boost/1.86.0_2/include -L/opt/homebrew/Cellar/boost/1.86.0_2/lib -lboost_system -Wall -g etano_d.cpp -o etano_d
 
 else ifeq ($(findstring MINGW,$(UNAME_S)),MINGW)
   # Windows specific commands (using MinGW environment)

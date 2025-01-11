@@ -80,7 +80,7 @@ void decomposicao_etano(const vector_type& N, vector_type& dNdV, double V, doubl
     // Fluxos molares
     double N_total = std::accumulate(N.begin(), N.end(), 0.0);
 
-    double Q = ((RG2*T)/P)*(Ntotal);
+    double Q = ((RG2*T)/P)*(N_total);
 
     // Concentrações
     double C_c2h6 = calculate_concentration(N[0], Q);
@@ -100,12 +100,12 @@ void decomposicao_etano(const vector_type& N, vector_type& dNdV, double V, doubl
     // double r6 = k6 * C_c2h5 * C_hno;
 
     // Equações diferenciais
-    dNdV[0] =  (-1*r1) - r3;        // dNc2h6/dV
+    dNdV[0] =  (-1) * (r1 + r3);        // dNc2h6/dV
     dNdV[1] =  r1 - r2 + r3;   // dNno/dV
     dNdV[2] =  r2;    // dNc2h5/dV
-    dNdV[3] =  r2-r3-r4;    // dNhno/dV
+    dNdV[3] =  r2 - r3 - r4;    // dNhno/dV
     dNdV[4] =  r3;    // dNh/dV
-    dNdV[5] =  (-1*r1) - r4;                   // dNc2h4/dV
+    dNdV[5] =  (-1) * (r1 + r4) ;                   // dNc2h4/dV
     dNdV[6] =  r1+r4;                   // dNh2/dV
 }
 
@@ -171,8 +171,11 @@ int main( int argc , char **argv )
         vector_type N0 (7);
         for (int i=0; i<7; i++) { N0[i] = 0.0; }
 
-        N0[0] = 6.62e-3;
-        N0[5] = 3.48e-4;
+        // N0[0] = 6.62e-3;
+        // N0[5] = 3.48e-4;
+
+        N0[0] = ((0.95*Qf*P)/(RG2*T));
+        N0[5] = ((0.05*Qf*P)/(RG2*T));
 
         typedef runge_kutta_dopri5< vector_type > dopri5_type;
         // typedef controlled_runge_kutta< dopri5_type > controlled_dopri5_type;
@@ -191,13 +194,13 @@ int main( int argc , char **argv )
 
 
         size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-2 , 1.0e-2 ,  dopri5_type() )  ,
-            sysEtano(), N0, 0.0, 0.0015, (0.0015/1e3),
+            sysEtano(), N0, 0.0, 1500.0, (1500/1e4),
             myObserver
         );
 
-        // size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (5.0e-3, 5.0e-3) ,
+        // size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (1.0e-1, 1.0e-1) ,
         //         make_pair(sysEtano() , JEtano()) ,
-        //         N0 , 0.0 , 0.0015, (0.0015/1e3), 
+        //         N0 , 0.0 , 1500.0, (1500/1e3), 
         //         myObserver
         // );
         
