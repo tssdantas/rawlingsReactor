@@ -83,19 +83,19 @@ void decomposicao_etano(const vector_type& N, vector_type& dNdV, double V, doubl
     double Q = ((RG2*T)/P)*(N_total);
 
     // Concentrações
-    double C_c2h6 = calculate_concentration(N[0], Q);
-    double C_c2h5_p = calculate_concentration(N[1], Q);
-    double C_c2h4 = calculate_concentration(N[2], Q);
-    double C_h = calculate_concentration(N[3], Q);
-    double C_h2 = calculate_concentration(N[4], Q);
-    double C_NO = calculate_concentration(N[5], Q);
-    double C_HNO = calculate_concentration(N[6], Q);
+    double C_c2h6 = calculate_concentration(N[0], Q); //1
+    double C_c2h5_p = calculate_concentration(N[1], Q); //2
+    double C_c2h4 = calculate_concentration(N[2], Q); //3
+    double C_h = calculate_concentration(N[3], Q); //4
+    double C_h2 = calculate_concentration(N[4], Q); //5 
+    double C_NO = calculate_concentration(N[5], Q); //6
+    double C_HNO = calculate_concentration(N[6], Q); //7
 
     // Taxas de reação
-    double r1 = k11 * C_c2h6 * C_NO - k12 * C_c2h5_p * C_HNO;
+    double r1 = (k11 * C_c2h6 * C_NO) - (k12 * C_c2h5_p * C_HNO);
     double r2 = k2 * C_c2h5_p;
     double r3 = k3 * C_h * C_c2h6;
-    double r4 = k41 * C_h * C_NO;
+    double r4 = (k41 * C_h * C_NO) - (k42*C_HNO);
     // double r5 = k5 * C_hno;
     // double r6 = k6 * C_c2h5 * C_hno;
 
@@ -181,8 +181,8 @@ int main( int argc , char **argv )
         // typedef controlled_runge_kutta< dopri5_type > controlled_dopri5_type;
         // typedef dense_output_runge_kutta< controlled_dopri5_type > dense_output_dopri5_type;
 
-        // size_t num_of_steps = integrate_const( make_dense_output( 3.0e-3 , 2.0e-3 , dopri5_type() ),
-        //     sysEtano(), N0, 0.0 , 0.0015, (0.0015/1e3),
+        // size_t num_of_steps = integrate_const( make_dense_output( 1.0e-2 , 1.0e-2 , dopri5_type() ),
+        //     sysEtano(), N0, 0.0 , 1500.0, (1500.0/1e3),
         //     myObserver
         // );
 
@@ -193,16 +193,16 @@ int main( int argc , char **argv )
         // );
 
 
-        size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-2 , 1.0e-2 ,  dopri5_type() )  ,
-            sysEtano(), N0, 0.0, 1500.0, (1500/1e4),
-            myObserver
-        );
-
-        // size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (1.0e-1, 1.0e-1) ,
-        //         make_pair(sysEtano() , JEtano()) ,
-        //         N0 , 0.0 , 1500.0, (1500/1e3), 
-        //         myObserver
+        // size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-2 , 1.0e-2 ,  dopri5_type() )  ,
+        //     sysEtano(), N0, 0.0, 1500.0, (1500/1e4),
+        //     myObserver
         // );
+
+        size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (1.0e-1, 1.0e-1) ,
+                make_pair(sysEtano() , JEtano()) ,
+                N0 , 0.0 , 1500.0, (1500/1e3), 
+                myObserver
+        );
         
         //clog << num_of_steps << endl;
 
