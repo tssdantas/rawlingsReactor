@@ -102,20 +102,6 @@ void myObserver(const vector_type &x, double t) {
 
 }
 
-struct StepOverflowChecker {
-    size_t max_steps;
-    size_t current_step;
-
-    StepOverflowChecker(size_t max_steps_) : max_steps(max_steps_), current_step(0) {}
-
-    template <class State>
-    void operator()(const State &, double) {
-        if (++current_step > max_steps) {
-            throw std::overflow_error("Maximum number of steps exceeded!");
-        }
-    }
-};
-
 
 int main( int argc , char **argv )
 {

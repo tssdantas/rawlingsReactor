@@ -86,20 +86,20 @@ sol = solve_ivp(
     fun=decomposicao_etano,     # ODE function
     t_span=(V_start, V_end),   # Integration interval
     y0=N0,                     # Initial conditions
-    method='BDF',              # Stiff solver
+    method='LSODA',              # Stiff solver
     t_eval=np.linspace(V_start, V_end, 1000),  # Evaluation points
     rtol=1e-6,                 # Relative tolerance
     atol=1e-8                  # Absolute tolerance
 )
 
 # Save results to CSV
-with open("output_stiff.csv", "w", newline="") as csvfile:
+with open("output_stiff_etano.csv", "w", newline="") as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerow(["Volume"] + [f"N{i+1}" for i in range(len(N0))])
+    #writer.writerow(["Volume"] + [f"N{i+1}" for i in range(len(N0))])
     for v, n in zip(sol.t, sol.y.T):
         writer.writerow([v] + n.tolist())
 
 # Display a preview of results
 print("Volume (V), ", ", ".join([f"N{i+1}" for i in range(len(N0))]))
-for v, n in zip(sol.t[:10], sol.y.T[:10]):  # Display the first 10 rows
+for v, n in zip(sol.t[-10:], sol.y.T[-10:]):  # Display the first 10 rows
     print(f"{v:.2f}, " + ", ".join([f"{ni:.5e}" for ni in n]))

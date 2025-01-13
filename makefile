@@ -13,13 +13,13 @@ else ifeq ($(findstring MINGW,$(UNAME_S)),MINGW)
 else ifeq ($(UNAME_S),Linux)
   # Linux specific commands
   OS := linux
-  #COMMAND = g++-10 -std=c++14 -I/.include -Wall -g etano.cpp -o etano
+  COMMAND = g++-10 -std=c++14 -I/usr/include -L/usr/lib -lboost_system -Wall -g etano_d.cpp -o etano
   #COMMAND = g++-10 -std=c++14 -I/mnt/e/apps/MATLAB/extern/include \
        -I/mnt/e/apps/MATLAB/simulink/include \
        -fPIC -shared -o benzeno.mexa64 benzeno_m.cpp \
        -L/mnt/e/apps/MATLAB/bin/glnxa64 -lmx -lmex -lmat
 
-  COMMAND = g++-10 -std=c++17 benzeno_m.cpp -I/mnt/e/apps/MATLAB/extern/include -L/mnt/e/apps/MATLAB/bin/glnxa64 -lMatlabEngine -lMatlabDataArray -o benzeno_m
+  #COMMAND = g++-10 -std=c++17 benzeno_m.cpp -I/mnt/e/apps/MATLAB/extern/include -L/mnt/e/apps/MATLAB/bin/glnxa64 -lMatlabEngine -lMatlabDataArray -o benzeno_m
 
 
 else
