@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 import csv
+import matplotlib.pyplot as plt
 
 # Constants
 mu = 1000.0
@@ -103,3 +104,16 @@ with open("output_stiff_etano.csv", "w", newline="") as csvfile:
 print("Volume (V), ", ", ".join([f"N{i+1}" for i in range(len(N0))]))
 for v, n in zip(sol.t[-10:], sol.y.T[-10:]):  # Display the first 10 rows
     print(f"{v:.2f}, " + ", ".join([f"{ni:.5e}" for ni in n]))
+
+# Plot results
+plt.figure(figsize=(10, 6))
+labels = ["C2H6", "C2H5+", "C2H4", "H", "H2", "NO", "HNO"]
+for i in range(len(N0)):
+    plt.plot(sol.t, sol.y[i], label=labels[i])
+
+plt.xlabel("Volume (cm³)")
+plt.ylabel("Molar Flow (mol/s)")
+plt.title("Decomposição do Etano - Perfis de Concentração")
+plt.legend()
+plt.grid()
+plt.show()
