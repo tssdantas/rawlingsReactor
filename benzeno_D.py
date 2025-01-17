@@ -1,32 +1,20 @@
 import numpy as np
-from scipy.integrate import ode
+import matplotlib.pyplot as plt
+from scipy.integrate import solve_ivp
 import csv
 
 # Constants
-mu = 1000.0
-A1 = 1e14
-E1 = 217600.0
-A2 = 3e14
-E2 = 165300.0
-A3 = 3.4e12
-E3 = 28500.0
-A4 = 1e12
-E4 = 0.0
-A5 = 1e13
-E5 = 200800.0
-A6 = 1e12
-E6 = 0.0
 R = 8314.0
-P = 101325.0
+P = 101325.0 # Pa
+PG = 1 # atm
+T = 1033  # System temperature (K)
+RG = 82.06  # cm³ atm/ mol K
 
 # Functions
-def calculate_k(A, E, T):
-    return A * np.exp(-E / (R * T))
-
 def calculate_concentration(N_species, N_total, T):
     return (P / (R * T)) * (N_species / N_total)
 
-def decomposicao_benezo(V, N, T):
+def decomposicao_benezo(V, N):
     """ODE system for benzene decomposition."""
     _k1 = 7.0e5  # L/mol.h
     K1 = 0.31
@@ -35,6 +23,7 @@ def decomposicao_benezo(V, N, T):
 
     # Total molar flow
     N_total = np.sum(N)
+    Q = (RG * T / PG) * N_total
 
     # Concentrations
     C_c6h6 = calculate_concentration(N[0], N_total, T)
@@ -55,34 +44,46 @@ def decomposicao_benezo(V, N, T):
 
     return dNdV
 
-# Observer
-def my_observer(V, N, file):
-    """Observer function to log results."""
-    file.writerow([V] + N.tolist())
-    #print(f"V: {V:.2f}\t" + "\t".join([f"{x:.5e}" for x in N]))
+# Initial conditions
+B0 = np.array([1.0, 0.0, 0.0, 0.0])
 
-# Main integration routine
-if __name__ == "__main__":
-    # Initial conditions
-    T = 1033  # System temperature (K)
-    B0 = np.array([1.0, 0.0, 0.0, 0.0])
+# Volume range
+V_start = 0.0
+V_end = 1500.0
 
-    # Volume range
-    V_start = 0.0
-    V_end = 1500.0
-    V_step = (V_end - V_start) / 1e4
+# Solver configuration
+sol = solve_ivp(
+    fun=decomposicao_benezo,
+    t_span=(V_start, V_end),
+    y0=B0,
+    method='Radau',
+    t_eval=np.linspace(V_start, V_end, 1000),
+    rtol=1e-8,
+    atol=1e-8
+)
 
-    # Open output file
-    with open("output_benzeno.csv", "w", newline="") as csvfile:
-        writer = csv.writer(csvfile)
-        #writer.writerow(["Volume"] + [f"N{i+1}" for i in range(len(B0))])
+#    # Save results to CSV
+# with open("output_stiff_benzeno.csv", "w", newline="") as csvfile:
+#     writer = csv.writer(csvfile)
+#     #writer.writerow(["Volume"] + [f"N{i+1}" for i in range(len(N0))])
+#     for v, n in zip(sol.t, sol.y.T):
+#         writer.writerow([v] + n.tolist())
 
-        # Initialize solver
-        solver = ode(lambda V, N: decomposicao_benezo(V, N, T))
-        solver.set_integrator('vode', method='bdf', atol=1e-8, rtol=1e-6) #LSODA, BDF, Radau
-        solver.set_initial_value(B0, V_start)
+# # Display a preview of results
+# print("Volume (V), ", ", ".join([f"N{i+1}" for i in range(len(B0))]))
+# for v, n in zip(sol.t[-10:], sol.y.T[-10:]):  # Display the first 10 rows
+#     print(f"{v:.2f}, " + ", ".join([f"{ni:.5e}" for ni in n]))
 
-        # Perform integration
-        while solver.successful() and solver.t <= V_end:
-            my_observer(solver.t, solver.y, writer)
-            solver.integrate(solver.t + V_step)
+
+# Plot results
+plt.figure(figsize=(10, 6))
+labels = ["C6H6", "H", "C12H10", "C18H14"]
+for i in range(len(B0)):
+    plt.plot(sol.t, sol.y[i], label=labels[i])
+
+plt.xlabel("Volume (cm³)")
+plt.ylabel("Molar Flow (mol/s)")
+plt.title("Decomposição do Benzeno - Perfis de Concentração")
+plt.legend()
+plt.grid()
+plt.show()

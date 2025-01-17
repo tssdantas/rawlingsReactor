@@ -1,6 +1,7 @@
 import numpy as np
-from scipy.integrate import odeint
+from scipy.integrate import solve_ivp
 import csv
+import matplotlib.pyplot as plt
 
 # Constants
 mu = 1000.0
@@ -32,7 +33,7 @@ def calculate_concentration(N_species, Q):
     return N_species / Q
 
 # ODE system
-def decomposicao_etano(N, V):
+def decomposicao_etano(V, N):
     # Calculate reaction rates
     k11 = calculate_k(A11, E11, T)
     k12 = calculate_k(A12, E12, T)
@@ -80,20 +81,39 @@ N0[5] = (0.05 * Qf * P) / (RG2 * T)  # Initial concentration of NO
 # Volume range
 V_start = 0.0
 V_end = 1500.0
-num_points = 1000
-V = np.linspace(V_start, V_end, num_points)
 
-# Solve the system
-result = odeint(decomposicao_etano, N0, V)
+# Solver configuration
+sol = solve_ivp(
+    fun=decomposicao_etano,     # ODE function
+    t_span=(V_start, V_end),   # Integration interval
+    y0=N0,                     # Initial conditions
+    method='LSODA',              # Stiff solver
+    t_eval=np.linspace(V_start, V_end, 1000),  # Evaluation points
+    rtol=1e-6,                 # Relative tolerance
+    atol=1e-8                  # Absolute tolerance
+)
 
 # Save results to CSV
-with open("output.csv", "w", newline="") as csvfile:
+with open("output_stiff_etano.csv", "w", newline="") as csvfile:
     writer = csv.writer(csvfile)
-    writer.writerow(["Volume"] + [f"N{i+1}" for i in range(len(N0))])
-    for v, n in zip(V, result):
+    #writer.writerow(["Volume"] + [f"N{i+1}" for i in range(len(N0))])
+    for v, n in zip(sol.t, sol.y.T):
         writer.writerow([v] + n.tolist())
 
 # Display a preview of results
 print("Volume (V), ", ", ".join([f"N{i+1}" for i in range(len(N0))]))
-for v, n in zip(V[:10], result[:10]):  # Display the first 10 rows
+for v, n in zip(sol.t[-10:], sol.y.T[-10:]):  # Display the first 10 rows
     print(f"{v:.2f}, " + ", ".join([f"{ni:.5e}" for ni in n]))
+
+# Plot results
+plt.figure(figsize=(10, 6))
+labels = ["C2H6", "C2H5+", "C2H4", "H", "H2", "NO", "HNO"]
+for i in range(len(N0)):
+    plt.plot(sol.t, sol.y[i], label=labels[i])
+
+plt.xlabel("Volume (cm³)")
+plt.ylabel("Molar Flow (mol/s)")
+plt.title("Decomposição do Etano - Perfis de Concentração")
+plt.legend()
+plt.grid()
+plt.show()
