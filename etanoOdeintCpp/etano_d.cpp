@@ -171,8 +171,8 @@ int main( int argc , char **argv )
         vector_type N0 (7);
         for (int i=0; i<7; i++) { N0[i] = 0.0; }
 
-        // N0[0] = 6.62e-3;
-        // N0[5] = 3.48e-4;
+        N0[0] = 6.62e-3;
+        N0[5] = 3.48e-4;
 
         N0[0] = ((0.95*Qf*P)/(RG2*T));
         N0[5] = ((0.05*Qf*P)/(RG2*T));
