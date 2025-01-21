@@ -100,10 +100,10 @@ int main() {
     CVodeSetLinearSolver(cvode_mem, LS, A);
 
     std::ofstream file("resultado.csv");
-    file << "V,N0,N1,N2,N3,N4,N5,N6\n";
+    //file << "V,N0,N1,N2,N3,N4,N5,N6\n";
 
     realtype V = V0;
-    realtype Vstep = 100.0; 
+    realtype Vstep = 10.0; 
 
     while (V < V1) {
         CVode(cvode_mem, V + Vstep, y, &V, CV_NORMAL);
