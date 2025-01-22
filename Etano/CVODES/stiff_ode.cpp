@@ -26,16 +26,16 @@ void decomposicao_etano(const vector_type& N, vector_type& dNdV, double V, doubl
     const double A11 = 1e14;
     const double A12 = 1e12;
     const double A2 = 3e14; 
-    const double A3= 3.4e12; 
-    const double A41=1e12; 
-    const double A42=1e13;
+    const double A3 = 3.4e12; 
+    const double A41 = 1e12; 
+    const double A42 = 1e13;
 
     const double E11 = 217.6e3; 
-    const double E12=0; 
-    const double E2=165.3e3; 
-    const double E3=28.5e3; 
-    const double E41=0; 
-    const double E42=200.8e3;
+    const double E12 = 0; 
+    const double E2 = 165.3e3; 
+    const double E3 = 28.5e3; 
+    const double E41 = 0; 
+    const double E42 = 200.8e3;
 
     double k11 = calculate_k(A11, E11, T);
     double k12 = calculate_k(A12, E12, T);

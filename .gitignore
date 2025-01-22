@@ -1,1 +1,6 @@
 /etano.dSYM/*
+/Etano/OdeintCpp/etano_d
+/Etano/OdeintCpp/*.csv
+/Etano/CVODES/etano_d
+/Etano/CVODES/*.csv
+/Etano/OdeintPython/*.csv
