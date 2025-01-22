@@ -1,6 +1,6 @@
 /etano.dSYM/*
-/Etano/OdeintCpp/etano_d
+/Etano/OdeintCpp/etano
 /Etano/OdeintCpp/*.csv
-/Etano/CVODES/etano_d
-/Etano/CVODES/*.csv
+/Etano/CVODES/stiff_ode
+/Etano/CVODES/resultado.csv
 /Etano/OdeintPython/*.csv

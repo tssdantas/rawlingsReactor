@@ -13,7 +13,7 @@ else ifeq ($(findstring MINGW,$(UNAME_S)),MINGW)
 else ifeq ($(UNAME_S),Linux)
   # Linux specific commands
   OS := linux
-  COMMAND = g++-10 -std=c++14 -I/usr/include -L/usr/lib -lboost_system -Wall -g etano_d.cpp -o etano_d
+  COMMAND = g++-10 -std=c++14 -I/usr/include -L/usr/lib -lboost_system -Wall -g etano_d.cpp -o etano
 
 
 else
