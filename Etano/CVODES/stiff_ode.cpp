@@ -23,9 +23,19 @@ double calculate_concentration(double N, double Q) {
 }
 
 void decomposicao_etano(const vector_type& N, vector_type& dNdV, double V, double T) {
-    double A11 = 1.0, E11 = 1.0, A12 = 1.0, E12 = 1.0;
-    double A2 = 1.0, E2 = 1.0, A3 = 1.0, E3 = 1.0;
-    double A41 = 1.0, E41 = 1.0, A42 = 1.0, E42 = 1.0;
+    const double A11 = 1e14;
+    const double A12 = 1e12;
+    const double A2 = 3e14; 
+    const double A3= 3.4e12; 
+    const double A41=1e12; 
+    const double A42=1e13;
+
+    const double E11 = 217.6e3; 
+    const double E12=0; 
+    const double E2=165.3e3; 
+    const double E3=28.5e3; 
+    const double E41=0; 
+    const double E42=200.8e3;
 
     double k11 = calculate_k(A11, E11, T);
     double k12 = calculate_k(A12, E12, T);
@@ -60,9 +70,10 @@ void decomposicao_etano(const vector_type& N, vector_type& dNdV, double V, doubl
 }
 
 int f(realtype V, N_Vector y, N_Vector ydot, void *user_data) {
-    double T = 1000.0; 
+    double T = 1050.0; 
     
-    vector_type N(7), dNdV(7);
+    vector_type N(7); 
+    vector_type dNdV(7);
     for (int i = 0; i < 7; i++) {
         N[i] = NV_Ith_S(y, i);
     }

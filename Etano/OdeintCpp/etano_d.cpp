@@ -30,7 +30,7 @@ const double mu = 1000.0;
 const double A11 = 1e14;
 const double A12 = 1e12;
 const double A2 = 3e14; 
-const double A3=3.4e12; 
+const double A3= 3.4e12; 
 const double A41=1e12; 
 const double A42=1e13;
 
@@ -193,16 +193,16 @@ int main( int argc , char **argv )
         // );
 
 
-        // size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-2 , 1.0e-2 ,  dopri5_type() )  ,
-        //     sysEtano(), N0, 0.0, 1500.0, (1500/1e4),
-        //     myObserver
-        // );
-
-        size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (1.0e-1, 1.0e-1) ,
-                make_pair(sysEtano() , JEtano()) ,
-                N0 , 0.0 , 1500.0, (1500/1e3), 
-                myObserver
+        size_t num_of_steps = integrate_adaptive(make_controlled( 1.0e-2 , 1.0e-2 ,  dopri5_type() )  ,
+            sysEtano(), N0, 0.0, 1500.0, (1500/1e4),
+            myObserver
         );
+
+        // size_t num_of_steps = integrate_const( make_dense_output< rosenbrock4< double > > (1.0e-1, 1.0e-1) ,
+        //         make_pair(sysEtano() , JEtano()) ,
+        //         N0 , 0.0 , 1500.0, (1500/1e3), 
+        //         myObserver
+        // );
         
         //clog << num_of_steps << endl;
 
